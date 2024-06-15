@@ -1,4 +1,10 @@
-# Godot 4+ specific ignores
+#Ignore everything in the list 
 .godot/
-/[Bb]build/
-[Bb]build/
+[Bb]build/*
+[Aa]udios/*
+[Mm]odels/*
+
+#But mantain the folders itself
+![Bb]build/.gitkeep
+![Aa]udios/.gitkeep
+![Mm]odels/.gitkeep
