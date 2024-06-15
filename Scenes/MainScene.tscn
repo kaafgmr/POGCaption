@@ -16,9 +16,52 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Label" type="Label" parent="PanelContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 36
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 64
 text = "test"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="SelectModel" type="PanelContainer" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="FileDialog" type="FileDialog" parent="PanelContainer/VBoxContainer/HBoxContainer/SelectModel"]
+title = "Open a Directory"
+size = Vector2i(392, 400)
+ok_button_text = "Select Current Folder"
+file_mode = 2
+show_hidden_files = true
+use_native_dialog = true
+
+[node name="Button" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer/SelectModel"]
+layout_mode = 2
+text = "Select model folder"
+
+[node name="SelectAudio" type="PanelContainer" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="FileDialog" type="FileDialog" parent="PanelContainer/VBoxContainer/HBoxContainer/SelectAudio"]
+title = "Open a File"
+size = Vector2i(300, 400)
+ok_button_text = "Open"
+file_mode = 0
+show_hidden_files = true
+
+[node name="Button" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer/SelectAudio"]
+layout_mode = 2
+text = "Select Audio file"
+
+[node name="InitRecognition" type="Button" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "InitRecognition"
+
+[connection signal="pressed" from="PanelContainer/VBoxContainer/HBoxContainer/SelectModel/Button" to="PanelContainer/VBoxContainer/HBoxContainer/SelectModel/FileDialog" method="popup_centered"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/HBoxContainer/SelectAudio/Button" to="PanelContainer/VBoxContainer/HBoxContainer/SelectAudio/FileDialog" method="popup_centered"]
