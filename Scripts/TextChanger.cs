@@ -2,20 +2,30 @@ using System.IO;
 using Godot;
 using Vosk;
 
-public partial class TextChanger : Label
+public partial class TextChanger : Node 
 {
     VoskRecognizer recognizer;
     private string pathToAudio;
     private string pathToModel;
+    private AudioStreamWav audioInfo;
 
-    private const string emptyResult = "\"\"";
+    [Export] private Label partialLabel;
+    [Export] private Label resultLabel;
 
     public void InitVosk()
     {
         if(!PathsAreSet()) return; 
 
+        audioInfo = ResourceLoader.Load<AudioStreamWav>(pathToAudio);
+
+        if(audioInfo == null)
+        {
+            Alerts.instance.ShowError("Failed to load audio");
+            return;
+        }
+
         Model model = new Model(pathToModel);
-        recognizer = new VoskRecognizer(model, 16000.0f);
+        recognizer = new VoskRecognizer(model, audioInfo.MixRate);
         recognizer.SetMaxAlternatives(0);
         recognizer.SetWords(true);
         ProcessData();
@@ -24,13 +34,34 @@ public partial class TextChanger : Label
     private void ProcessData()
     {
         Stream source = File.OpenRead(pathToAudio);
-        byte[] buffer = new byte[4096];
+        byte[] deltaSamples = new byte[GetDeltaSamples()];
         int bytesRead;
-        while ((bytesRead = source.Read(buffer, 0, buffer.Length)) > 0)
+        while ((bytesRead = source.Read(deltaSamples, 0, deltaSamples.Length)) > 0)
         {
-            if(!recognizer.AcceptWaveform(buffer, bytesRead) && !recognizer.PartialResult().Contains(emptyResult))
+            Json json = new Json();
+            Error err;
+            if(recognizer.AcceptWaveform(deltaSamples, bytesRead))
             {
-                ChangeLabelText(recognizer.PartialResult());
+               err = json.Parse(recognizer.FinalResult());
+            
+               if (err != Error.Ok)
+               {
+                   Alerts.instance.ShowError("Parsing final result failed");
+                   continue;
+               }
+
+               resultLabel.Text = json.Data.AsGodotDictionary()["text"].ToString();
+            }
+            else
+            {
+               err = json.Parse(recognizer.PartialResult());
+
+               if (err != Error.Ok)
+               {
+                   Alerts.instance.ShowError("Parsing partial result failed");
+                   continue;
+               }
+               partialLabel.Text = json.Data.AsGodotDictionary()["partial"].ToString(); 
             }
         }
     }
@@ -45,28 +76,30 @@ public partial class TextChanger : Label
         pathToModel = modelPath;
     }
 
-    private void ChangeLabelText(string newText)
-    {
-        Text = newText;
-    }
-
     private bool PathsAreSet()
     {
-        LabelSettings.FontColor = Colors.Yellow;
         if(pathToModel == null )
         { 
-            Text = "Select the model path";
+            Alerts.instance.ShowWarning("Path to model not set");
             return false;
         }
 
         if (pathToAudio == null)
         {
-            Text = "Select an audio to transcribe";
+            Alerts.instance.ShowWarning("Path to audio not set");
             return false;
         }
-
-        LabelSettings.FontColor = Colors.White;
         return true;
+    }
+
+    private int GetDeltaSamples()
+    {
+        return (GetDeltaTimeInMillis() * audioInfo.MixRate) / 1000;
+    }
+
+    private int GetDeltaTimeInMillis()
+    {
+        return (int)(GetPhysicsProcessDeltaTime() * 1000);
     }
 
     public override void _ExitTree()

@@ -1,11 +1,10 @@
-[gd_scene load_steps=3 format=3 uid="uid://c2plnivoknxfe"]
+[gd_scene load_steps=4 format=3 uid="uid://c2plnivoknxfe"]
 
+[ext_resource type="LabelSettings" uid="uid://ba1wn3yx7fulw" path="res://Style/LabelSettings.tres" id="1_7spef"]
 [ext_resource type="Script" path="res://Scripts/TextChanger.cs" id="1_odrie"]
+[ext_resource type="Script" path="res://Scripts/Alerts.cs" id="1_tdlbg"]
 
-[sub_resource type="LabelSettings" id="LabelSettings_1k0y7"]
-font_size = 32
-
-[node name="Control" type="Control"]
+[node name="App" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -13,7 +12,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="PanelContainer" type="PanelContainer" parent="."]
+[node name="AppContainer" type="PanelContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -21,26 +20,50 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
+[node name="AcceptDialog" type="AcceptDialog" parent="AppContainer"]
+title = "Oh no!!! :("
+initial_position = 4
+size = Vector2i(200, 106)
+ok_button_text = "Sorry :("
+dialog_text = "You did an oopsies"
+dialog_autowrap = true
+script = ExtResource("1_tdlbg")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="AppContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="PanelContainer/VBoxContainer"]
+[node name="ResultLabels" type="PanelContainer" parent="AppContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Node" type="Node" parent="AppContainer/VBoxContainer/ResultLabels" node_paths=PackedStringArray("partialLabel", "resultLabel")]
+script = ExtResource("1_odrie")
+partialLabel = NodePath("../VBoxContainer/PartialLabel")
+resultLabel = NodePath("../VBoxContainer/ResultLabel")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="AppContainer/VBoxContainer/ResultLabels"]
+layout_mode = 2
+
+[node name="PartialLabel" type="Label" parent="AppContainer/VBoxContainer/ResultLabels/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 64
-text = "test"
-label_settings = SubResource("LabelSettings_1k0y7")
-horizontal_alignment = 1
+text = "Partial:"
+label_settings = ExtResource("1_7spef")
 vertical_alignment = 1
-script = ExtResource("1_odrie")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer"]
+[node name="ResultLabel" type="Label" parent="AppContainer/VBoxContainer/ResultLabels/VBoxContainer"]
+layout_mode = 2
+text = "Result: "
+label_settings = ExtResource("1_7spef")
+vertical_alignment = 1
+
+[node name="Audio_ModelButtons" type="HBoxContainer" parent="AppContainer/VBoxContainer"]
 layout_mode = 2
 alignment = 1
 
-[node name="SelectModel" type="PanelContainer" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+[node name="SelectModel" type="PanelContainer" parent="AppContainer/VBoxContainer/Audio_ModelButtons"]
 layout_mode = 2
 
-[node name="FileDialog" type="FileDialog" parent="PanelContainer/VBoxContainer/HBoxContainer/SelectModel"]
+[node name="FileDialog" type="FileDialog" parent="AppContainer/VBoxContainer/Audio_ModelButtons/SelectModel"]
 title = "Open a Directory"
 size = Vector2i(392, 400)
 ok_button_text = "Select Current Folder"
@@ -49,31 +72,31 @@ access = 2
 show_hidden_files = true
 use_native_dialog = true
 
-[node name="Button" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer/SelectModel"]
+[node name="Button" type="Button" parent="AppContainer/VBoxContainer/Audio_ModelButtons/SelectModel"]
 layout_mode = 2
 text = "Select model folder"
 
-[node name="SelectAudio" type="PanelContainer" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+[node name="SelectAudio" type="PanelContainer" parent="AppContainer/VBoxContainer/Audio_ModelButtons"]
 layout_mode = 2
 
-[node name="FileDialog" type="FileDialog" parent="PanelContainer/VBoxContainer/HBoxContainer/SelectAudio"]
+[node name="FileDialog" type="FileDialog" parent="AppContainer/VBoxContainer/Audio_ModelButtons/SelectAudio"]
 title = "Open a File"
-size = Vector2i(312, 400)
+size = Vector2i(337, 400)
 ok_button_text = "Open"
 file_mode = 0
 access = 2
 use_native_dialog = true
 
-[node name="Button" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer/SelectAudio"]
+[node name="Button" type="Button" parent="AppContainer/VBoxContainer/Audio_ModelButtons/SelectAudio"]
 layout_mode = 2
 text = "Select Audio file"
 
-[node name="InitRecognition" type="Button" parent="PanelContainer/VBoxContainer"]
+[node name="InitRecognitionButton" type="Button" parent="AppContainer/VBoxContainer"]
 layout_mode = 2
 text = "InitRecognition"
 
-[connection signal="dir_selected" from="PanelContainer/VBoxContainer/HBoxContainer/SelectModel/FileDialog" to="PanelContainer/VBoxContainer/Label" method="SetModelPath"]
-[connection signal="pressed" from="PanelContainer/VBoxContainer/HBoxContainer/SelectModel/Button" to="PanelContainer/VBoxContainer/HBoxContainer/SelectModel/FileDialog" method="popup_centered"]
-[connection signal="file_selected" from="PanelContainer/VBoxContainer/HBoxContainer/SelectAudio/FileDialog" to="PanelContainer/VBoxContainer/Label" method="SetAudioPath"]
-[connection signal="pressed" from="PanelContainer/VBoxContainer/HBoxContainer/SelectAudio/Button" to="PanelContainer/VBoxContainer/HBoxContainer/SelectAudio/FileDialog" method="popup_centered"]
-[connection signal="pressed" from="PanelContainer/VBoxContainer/InitRecognition" to="PanelContainer/VBoxContainer/Label" method="InitVosk"]
+[connection signal="dir_selected" from="AppContainer/VBoxContainer/Audio_ModelButtons/SelectModel/FileDialog" to="AppContainer/VBoxContainer/ResultLabels/Node" method="SetModelPath"]
+[connection signal="pressed" from="AppContainer/VBoxContainer/Audio_ModelButtons/SelectModel/Button" to="AppContainer/VBoxContainer/Audio_ModelButtons/SelectModel/FileDialog" method="popup_centered"]
+[connection signal="file_selected" from="AppContainer/VBoxContainer/Audio_ModelButtons/SelectAudio/FileDialog" to="AppContainer/VBoxContainer/ResultLabels/Node" method="SetAudioPath"]
+[connection signal="pressed" from="AppContainer/VBoxContainer/Audio_ModelButtons/SelectAudio/Button" to="AppContainer/VBoxContainer/Audio_ModelButtons/SelectAudio/FileDialog" method="popup_centered"]
+[connection signal="pressed" from="AppContainer/VBoxContainer/InitRecognitionButton" to="AppContainer/VBoxContainer/ResultLabels/Node" method="InitVosk"]

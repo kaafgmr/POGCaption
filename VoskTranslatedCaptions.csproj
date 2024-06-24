@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <PackageReference Include="Vosk" Version="0.3.38" />
+    <PackageReference Include="FFMpegCore" Version="5.1.0" />
   </ItemGroup>
 
 </Project>
